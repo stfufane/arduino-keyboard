@@ -6,27 +6,32 @@
 Keyboard::Keyboard(midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiInterface)
     : mMidiInterface(midiInterface), 
       mInputPins { 2, 3, 4, 5, 6, 7, 8, 9 }, 
-      mOutputPins { 22, 23, 24, 25, 26, 27, 28, 29 }
+      mOutputPins { 22, 23, 24, 25, 26, 27, 28, 29 },
+      mControlPins { new Button(30, *this, &KeyboardCallbacks::lowerOctave),
+                    new Button(32, *this, &KeyboardCallbacks::upperOctave),
+                    new Modulation(A0, 1, midiInterface),
+                    new PitchWheel(A1, midiInterface)
+                }
 {
-    Button minus_octave(30, *this, &KeyboardCallbacks::lowerOctave);
-    Button plus_octave(32, *this, &KeyboardCallbacks::upperOctave);
-
-    Modulation modWheel(A0, 1, midiInterface);
-    PitchWheel pitchWheel(A1, midiInterface);
-}
-
-void Keyboard::setup()
-{
-    // Declare column pins
-    for (byte pin = 0; pin < sizeof(mOutputPins); pin++)
+    // Declare column pins of the scan matrix
+    for (int pin = 0; pin < sizeof(mOutputPins); pin++)
     {
         pinMode(mOutputPins[pin], OUTPUT);
     }
 
-    // Declare row pins
-    for (byte pin = 0; pin < sizeof(mInputPins); pin++)
+    // Declare row pins of the scan matrix
+    for (int pin = 0; pin < sizeof(mInputPins); pin++)
     {
         pinMode(mInputPins[pin], INPUT_PULLUP);
+    }
+}
+
+void Keyboard::setup()
+{
+    // Setup control pins
+    for (int pin = 0; pin < sizeof(mControlPins); pin++)
+    {
+        mControlPins[pin]->setup();
     }
 
     // Init key map.
@@ -45,6 +50,12 @@ void Keyboard::setup()
 
 void Keyboard::checkValues()
 {
+    // Read control pins
+    for (int pin = 0; pin < sizeof(mControlPins); pin++)
+    {
+        mControlPins[pin]->checkValue();
+    }
+
     // Loop on columns
     for (int colCtr = 0; colCtr < NUM_COLS; ++colCtr)
     {
@@ -111,3 +122,22 @@ void Keyboard::noteOn(int row, int col)
     mMidiInterface.sendNoteOn(mKeyToMidiMap[row][col] + (mOctaveOffset * 12), vel, 1);
 }
 
+/**
+ * Callbacks that will be called by buttons (see Button class)
+ */
+
+void KeyboardCallbacks::lowerOctave(Keyboard &keyboard)
+{
+    if (keyboard.getOctaveOffset() > -3)
+    {
+        keyboard.setOctaveOffset(keyboard.getOctaveOffset() - 1);
+    }
+}
+
+void KeyboardCallbacks::upperOctave(Keyboard &keyboard)
+{
+    if (keyboard.getOctaveOffset() < 3)
+    {
+        keyboard.setOctaveOffset(keyboard.getOctaveOffset() + 1);
+    }
+}

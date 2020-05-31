@@ -32,7 +32,7 @@ void PitchWheel::checkValue()
     }
 
     // No need to send a message if the difference between values is not significant enough.
-    if (abs(mLastValue - mValue) < 4) 
+    if (abs(mLastValue - mValue) < 16) 
         return;
     
     int value;

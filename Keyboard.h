@@ -1,12 +1,14 @@
 #pragma once
 
-#include <Arduino.h>
-// #include <vector>
 #include <MIDI.h>
+#include "ControlPin.h"
 
 // Number of rows and columns of the keyboard scan matrix
 #define NUM_ROWS 8
 #define NUM_COLS 8
+
+// Number of control pins
+#define NB_PINS 4
 
 #define MAX_VELOCITY 127
 
@@ -21,12 +23,11 @@ class Keyboard
         void setup();
         void checkValues();
 
-        void noteOn(int row, int col);
         int getOctaveOffset() { return mOctaveOffset; }
         void setOctaveOffset(int offset) { mOctaveOffset = offset; }
     private:
         midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &mMidiInterface;
-        // std::vector<ControlPin> mControlPins;
+        ControlPin* mControlPins[NB_PINS];
 
         // Row input pins
         byte mInputPins[NUM_ROWS];
@@ -41,26 +42,15 @@ class Keyboard
         int mRowValue[NUM_ROWS];
 
         int mOctaveOffset = 0;
+        
+        void noteOn(int row, int col);
 };
 
 class KeyboardCallbacks
 {
 public:
-    static void lowerOctave(Keyboard &keyboard)
-    {
-        if (keyboard.getOctaveOffset() > -3)
-        {
-            keyboard.setOctaveOffset(keyboard.getOctaveOffset() - 1);
-        }
-    }
-
-    static void upperOctave(Keyboard &keyboard)
-    {
-        if (keyboard.getOctaveOffset() < 3)
-        {
-            keyboard.setOctaveOffset(keyboard.getOctaveOffset() + 1);
-        }
-    }
+    static void lowerOctave(Keyboard &keyboard);
+    static void upperOctave(Keyboard &keyboard);
 };
 
 typedef void (*KeyboardCallback)(Keyboard &keyboard);

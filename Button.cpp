@@ -4,11 +4,14 @@ Button::Button(int pin, Keyboard &keyboard, KeyboardCallback keyboardCallback)
     : ControlPin(pin), 
       mKeyboard(keyboard),
       mKeyboardCallback(keyboardCallback)
-{}
+{
+    pinMode(mPin, INPUT);
+}
 
 void Button::setup()
 {
-    pinMode(mPin, INPUT);
+    mState = LOW;
+    mLastState = LOW;
 }
 
 void Button::checkValue()
