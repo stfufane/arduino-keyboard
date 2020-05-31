@@ -1,20 +1,23 @@
-#include "MIDI_Keyboard.h"
+#include <MIDI.h>
+#include "Keyboard.h"
 
-// MIDI baud rate
-#define SERIAL_RATE 31250
+// This inits the midi interface and creates an instance.
+MIDI_CREATE_DEFAULT_INSTANCE();
+
+// Keyboard class declares all the inputs and reads them.
+Keyboard keyboard(MIDI);
 
 void setup()
 {
-    initKeys();
-    initPins();
+    // Start MIDI on serial port.
+    MIDI.begin();
 
-    Serial1.begin(SERIAL_RATE);
+    // Add a short delay before reading the first values.
+    delay(200);
+    keyboard.setup();
 }
 
 void loop()
 {
-    readState(&minus_octave);
-    readState(&plus_octave);
-
-    readKeys();
+    keyboard.checkValues();
 }
