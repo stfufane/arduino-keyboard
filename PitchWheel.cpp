@@ -50,6 +50,7 @@ void PitchWheel::checkValue()
 
 void PitchWheel::sendMessage(int value)
 {
+    DBG("Pitch");
     mMidiInterface.sendPitchBend(value, 1);
     mLastValue = mValue;
     mLastSentValue = value;

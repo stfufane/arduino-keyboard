@@ -2,6 +2,7 @@
 
 #include <Arduino.h>
 #include <MIDI.h>
+#include "Debug.h"
 #include "ControlPin.h"
 
 class Modulation : public ControlPin

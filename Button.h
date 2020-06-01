@@ -1,6 +1,7 @@
 #pragma once
 
 #include <Arduino.h>
+#include "Debug.h"
 #include "ControlPin.h"
 #include "Keyboard.h"
 

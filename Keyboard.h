@@ -2,6 +2,7 @@
 
 #include <MIDI.h>
 #include <Arduino.h>
+#include "Debug.h"
 #include "ControlPin.h"
 
 // Number of rows and columns of the keyboard scan matrix
@@ -30,10 +31,9 @@ class Keyboard
         midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &mMidiInterface;
         ControlPin* mControlPins[NB_PINS];
 
-        // Row input pins
+        // Row input pins of the scan matrix
         byte mInputPins[NUM_ROWS];
-
-        // Column output pins
+        // Column output pins of the scan matrix
         byte mOutputPins[NUM_COLS];
 
         // Key states and time between 2 signals

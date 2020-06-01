@@ -18,6 +18,7 @@ void Button::checkValue()
 {
     mState = digitalRead(mPin);
     if (mState != mLastState && mState == HIGH) {
+        DBG("Button pressed");
         mKeyboardCallback(mKeyboard);
     }
     mLastState = mState;

@@ -100,6 +100,7 @@ void Keyboard::checkValues()
             {
                 mKeyPressed[rowCtr][colCtr] = false;
                 mMidiInterface.sendNoteOff(mKeyToMidiMap[rowCtr][colCtr] + (mOctaveOffset * 12), 0, 1);
+                DBG("Note off");
             }
         }
     }
@@ -107,6 +108,7 @@ void Keyboard::checkValues()
 
 void Keyboard::noteOn(int row, int col)
 {
+    DBG("Note on");
     unsigned long t = mKeyTime[row][col];
     if (t > MAX_TIME)
         t = MAX_TIME;

@@ -29,6 +29,7 @@ void Modulation::checkValue()
     if (value != mLastSentValue)
     {
         mMidiInterface.sendControlChange(mCc, value, 1);
+        DBG("CC");
         mLastValue = mValue;
         mLastSentValue = value;
         mLastSentTime = millis();
