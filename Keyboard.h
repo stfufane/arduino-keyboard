@@ -1,6 +1,7 @@
 #pragma once
 
 #include <MIDI.h>
+#include <Arduino.h>
 #include "ControlPin.h"
 
 // Number of rows and columns of the keyboard scan matrix
@@ -37,7 +38,7 @@ class Keyboard
 
         // Key states and time between 2 signals
         bool mKeyPressed[NUM_ROWS][NUM_COLS];
-        unsigned long keyTime[NUM_ROWS][NUM_COLS];
+        unsigned long mKeyTime[NUM_ROWS][NUM_COLS];
         uint8_t mKeyToMidiMap[NUM_ROWS][NUM_COLS];
         int mRowValue[NUM_ROWS];
 

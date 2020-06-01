@@ -7,20 +7,21 @@ Keyboard::Keyboard(midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiIn
     : mMidiInterface(midiInterface), 
       mInputPins { 2, 3, 4, 5, 6, 7, 8, 9 }, 
       mOutputPins { 22, 23, 24, 25, 26, 27, 28, 29 },
-      mControlPins { new Button(30, *this, &KeyboardCallbacks::lowerOctave),
-                    new Button(32, *this, &KeyboardCallbacks::upperOctave),
-                    new Modulation(A0, 1, midiInterface),
-                    new PitchWheel(A1, midiInterface)
-                }
-{
+      mControlPins { 
+                     new Button(30, *this, &KeyboardCallbacks::lowerOctave),
+                     new Button(32, *this, &KeyboardCallbacks::upperOctave),
+                     new Modulation(A0, 1, midiInterface),
+                     new PitchWheel(A1, midiInterface)
+                   }
+{  
     // Declare column pins of the scan matrix
-    for (int pin = 0; pin < sizeof(mOutputPins); pin++)
+    for (int pin = 0; pin < NUM_COLS; pin++)
     {
         pinMode(mOutputPins[pin], OUTPUT);
     }
 
     // Declare row pins of the scan matrix
-    for (int pin = 0; pin < sizeof(mInputPins); pin++)
+    for (int pin = 0; pin < NUM_ROWS; pin++)
     {
         pinMode(mInputPins[pin], INPUT_PULLUP);
     }
@@ -29,7 +30,7 @@ Keyboard::Keyboard(midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiIn
 void Keyboard::setup()
 {
     // Setup control pins
-    for (int pin = 0; pin < sizeof(mControlPins); pin++)
+    for (int pin = 0; pin < NB_PINS; pin++)
     {
         mControlPins[pin]->setup();
     }
@@ -41,7 +42,7 @@ void Keyboard::setup()
         for (int colCtr = 0; colCtr < NUM_COLS; ++colCtr)
         {
             mKeyPressed[rowCtr][colCtr] = false;
-            keyTime[rowCtr][colCtr] = 0;
+            mKeyTime[rowCtr][colCtr] = 0;
             mKeyToMidiMap[rowCtr][colCtr] = note;
             note++;
         }
@@ -51,7 +52,7 @@ void Keyboard::setup()
 void Keyboard::checkValues()
 {
     // Read control pins
-    for (int pin = 0; pin < sizeof(mControlPins); pin++)
+    for (int pin = 0; pin < NB_PINS; pin++)
     {
         mControlPins[pin]->checkValue();
     }
@@ -79,15 +80,15 @@ void Keyboard::checkValues()
             if (mRowValue[rowCtr] != 0 && !mKeyPressed[rowCtr][colCtr])
             {
                 mKeyPressed[rowCtr][colCtr] = true;
-                keyTime[rowCtr][colCtr] = micros();
+                mKeyTime[rowCtr][colCtr] = micros();
             }
 
             // Then read the even rows and measure the time difference with the odd row.
-            if (mRowValue[rowCtr - 1] != 0 && keyTime[rowCtr][colCtr] > 0)
+            if (mRowValue[rowCtr - 1] != 0 && mKeyTime[rowCtr][colCtr] > 0)
             {
-                keyTime[rowCtr][colCtr] = micros() - keyTime[rowCtr][colCtr];
+                mKeyTime[rowCtr][colCtr] = micros() - mKeyTime[rowCtr][colCtr];
                 noteOn(rowCtr, colCtr);
-                keyTime[rowCtr][colCtr] = 0;
+                mKeyTime[rowCtr][colCtr] = 0;
             }
         }
 
@@ -106,7 +107,7 @@ void Keyboard::checkValues()
 
 void Keyboard::noteOn(int row, int col)
 {
-    unsigned long t = keyTime[row][col];
+    unsigned long t = mKeyTime[row][col];
     if (t > MAX_TIME)
         t = MAX_TIME;
     if (t < MIN_TIME)
