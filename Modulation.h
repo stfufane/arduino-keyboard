@@ -3,18 +3,18 @@
 #include <Arduino.h>
 #include <MIDI.h>
 #include "Debug.h"
+#include "Keyboard.h"
 #include "ControlPin.h"
+#include "DigitDisplay.h"
 
 class Modulation : public ControlPin
 {
     public:
-        Modulation(byte pin, int cc, midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiInterface);
+        Modulation(int pin, int cc, Keyboard& keyboard);
         void setup() override;
         // Read value at each loop
         void checkValue() override;
     private:
-        // Reference to the midi interface declared in main sketch
-        midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &mMidiInterface;
         int mCc;
         // Potentiometer value
         int mValue;

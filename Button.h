@@ -15,5 +15,4 @@ class Button: public ControlPin
         int mState;
         int mLastState;
         KeyboardCallback mKeyboardCallback;
-        Keyboard &mKeyboard;
 };

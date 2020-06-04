@@ -3,19 +3,18 @@
 #include <Arduino.h>
 #include <MIDI.h>
 #include "Debug.h"
+#include "Keyboard.h"
 #include "ControlPin.h"
+#include "DigitDisplay.h"
 
 class PitchWheel : public ControlPin
 {
     public:
-        PitchWheel(byte pin, midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiInterface);
+        PitchWheel(int pin, Keyboard& keyboard);
         void setup() override;
         // Read value at each loop
         void checkValue() override;
-    private:
-        // Reference to the midi interface declared in main sketch
-        midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &mMidiInterface;
-        
+    private:        
         // Potentiometer value
         int mValue;
         int mLastValue;
@@ -25,5 +24,5 @@ class PitchWheel : public ControlPin
         int mLastSentValue;
         unsigned long mLastSentTime; // Time of last signal sent
 
-        void sendMessage(int value);
+        void sendMessage(int value, int display);
 };

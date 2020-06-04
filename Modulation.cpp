@@ -1,8 +1,7 @@
 #include "Modulation.h"
 
-Modulation::Modulation(byte pin, int cc, midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiInterface)
-    : mMidiInterface(midiInterface),
-      ControlPin(pin),
+Modulation::Modulation(int pin, int cc, Keyboard &keyboard)
+    : ControlPin(pin, keyboard),
       mCc(cc)
 {
     pinMode(mPin, INPUT);
@@ -28,8 +27,10 @@ void Modulation::checkValue()
     int value = map(mValue, 0, 1023, 0, 127);
     if (value != mLastSentValue)
     {
-        mMidiInterface.sendControlChange(mCc, value, 1);
+        mKeyboard.getMidi().sendControlChange(mCc, value, 1);
+        // mKeyboard.getDisplay()->setBuffer('c', value);
         DBG("CC");
+        DBG(value);
         mLastValue = mValue;
         mLastSentValue = value;
         mLastSentTime = millis();

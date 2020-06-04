@@ -1,8 +1,7 @@
 #include "Button.h"
 
 Button::Button(int pin, Keyboard &keyboard, KeyboardCallback keyboardCallback)
-    : ControlPin(pin), 
-      mKeyboard(keyboard),
+    : ControlPin(pin, keyboard), 
       mKeyboardCallback(keyboardCallback)
 {
     pinMode(mPin, INPUT);
@@ -18,7 +17,6 @@ void Button::checkValue()
 {
     mState = digitalRead(mPin);
     if (mState != mLastState && mState == HIGH) {
-        DBG("Button pressed");
         mKeyboardCallback(mKeyboard);
     }
     mLastState = mState;

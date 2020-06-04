@@ -7,11 +7,12 @@ Keyboard::Keyboard(midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiIn
     : mMidiInterface(midiInterface), 
       mInputPins { 2, 3, 4, 5, 6, 7, 8, 9 }, 
       mOutputPins { 22, 23, 24, 25, 26, 27, 28, 29 },
+      mDigitDisplay(),
       mControlPins { 
                      new Button(30, *this, &KeyboardCallbacks::lowerOctave),
                      new Button(32, *this, &KeyboardCallbacks::upperOctave),
-                     new Modulation(A0, 1, midiInterface),
-                     new PitchWheel(A1, midiInterface)
+                     new Modulation(A0, 1, *this),
+                     new PitchWheel(A1, *this)
                    }
 {  
     // Declare column pins of the scan matrix
@@ -29,6 +30,9 @@ Keyboard::Keyboard(midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiIn
 
 void Keyboard::setup()
 {
+    // Init display pins.
+    mDigitDisplay.setup();
+
     // Setup control pins
     for (int pin = 0; pin < NB_PINS; pin++)
     {
@@ -104,6 +108,7 @@ void Keyboard::checkValues()
             }
         }
     }
+    mDigitDisplay.displayBuffer();
 }
 
 void Keyboard::noteOn(int row, int col)
@@ -134,6 +139,8 @@ void KeyboardCallbacks::lowerOctave(Keyboard &keyboard)
     if (keyboard.getOctaveOffset() > -3)
     {
         keyboard.setOctaveOffset(keyboard.getOctaveOffset() - 1);
+        int offset = keyboard.getOctaveOffset();
+        keyboard.getDisplay()->setBuffer((offset < 0 ? '-' : ' '), abs(offset));
     }
 }
 
@@ -142,5 +149,7 @@ void KeyboardCallbacks::upperOctave(Keyboard &keyboard)
     if (keyboard.getOctaveOffset() < 3)
     {
         keyboard.setOctaveOffset(keyboard.getOctaveOffset() + 1);
+        int offset = keyboard.getOctaveOffset();
+        keyboard.getDisplay()->setBuffer((offset < 0 ? '-' : ' '), abs(offset));
     }
 }

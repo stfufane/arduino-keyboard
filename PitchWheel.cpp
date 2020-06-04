@@ -1,8 +1,7 @@
 #include "PitchWheel.h"
 
-PitchWheel::PitchWheel(byte pin, midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiInterface)
-    : mMidiInterface(midiInterface), 
-      ControlPin(pin)
+PitchWheel::PitchWheel(int pin, Keyboard& keyboard)
+    : ControlPin(pin, keyboard)
 {
     pinMode(mPin, INPUT);
 }
@@ -27,7 +26,7 @@ void PitchWheel::checkValue()
     
     // There's a dead zone at the center so we need to be sure we send 0 when we're very close.
     if (abs(mValue - mCenter) < 4 && mLastSentValue != 0) {
-        sendMessage(0);
+        sendMessage(0, 0);
         return;
     }
 
@@ -35,23 +34,26 @@ void PitchWheel::checkValue()
     if (abs(mLastValue - mValue) < 16) 
         return;
     
-    int value;
+    int value, display;
     if (mValue < mCenter) {
         value = int(double(mCenter - mValue) / mCenter * double(MIDI_PITCHBEND_MIN));
+        display = map(mValue, 0, mCenter, 0, 64);
     } else {
         value = int(double(mValue - mCenter) / double(1023.0f - mCenter) * double(MIDI_PITCHBEND_MAX));
+        display = map(mValue, mCenter, 1023, 64, 127);
     }
 
     if (value != mLastSentValue)
     {
-        sendMessage(value);
+        sendMessage(value, display);
     }
 }
 
-void PitchWheel::sendMessage(int value)
+void PitchWheel::sendMessage(int value, int display)
 {
     DBG("Pitch");
-    mMidiInterface.sendPitchBend(value, 1);
+    // mKeyboard.getDisplay()->setBuffer('p', display);
+    mKeyboard.getMidi().sendPitchBend(value, 1);
     mLastValue = mValue;
     mLastSentValue = value;
     mLastSentTime = millis();

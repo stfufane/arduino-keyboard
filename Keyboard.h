@@ -3,7 +3,7 @@
 #include <MIDI.h>
 #include <Arduino.h>
 #include "Debug.h"
-#include "ControlPin.h"
+#include "DigitDisplay.h"
 
 // Number of rows and columns of the keyboard scan matrix
 #define NUM_ROWS 8
@@ -18,6 +18,8 @@
 #define MAX_TIME 131072
 #define DIFF_TIME (MAX_TIME - MIN_TIME)
 
+class ControlPin;
+
 class Keyboard
 {
     public:
@@ -27,9 +29,13 @@ class Keyboard
 
         int getOctaveOffset() { return mOctaveOffset; }
         void setOctaveOffset(int offset) { mOctaveOffset = offset; }
+        DigitDisplay* getDisplay() { return &mDigitDisplay; }
+        midi::MidiInterface<midi::SerialMIDI<HardwareSerial>>& getMidi() { return mMidiInterface; }
     private:
         midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &mMidiInterface;
         ControlPin* mControlPins[NB_PINS];
+
+        DigitDisplay mDigitDisplay;
 
         // Row input pins of the scan matrix
         byte mInputPins[NUM_ROWS];
