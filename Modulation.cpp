@@ -28,9 +28,6 @@ void Modulation::checkValue()
     if (value != mLastSentValue)
     {
         mKeyboard.getMidi().sendControlChange(mCc, value, 1);
-        // mKeyboard.getDisplay()->setBuffer('c', value);
-        DBG("CC");
-        DBG(value);
         mLastValue = mValue;
         mLastSentValue = value;
         mLastSentTime = millis();

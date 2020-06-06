@@ -24,5 +24,5 @@ class PitchWheel : public ControlPin
         int mLastSentValue;
         unsigned long mLastSentTime; // Time of last signal sent
 
-        void sendMessage(int value, int display);
+        void sendMessage(int value);
 };

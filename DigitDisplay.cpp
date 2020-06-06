@@ -4,6 +4,11 @@
 DigitDisplay::DigitDisplay()
     : mBuffer {' ', ' ', ' ', ' '}
 {
+    // Init the character conversion table with zeros
+    for (int i = 0; i < 128; i++) {
+        mCharConversion[i] = 0b00000000;
+    }
+    // Then define the values we will use
     /*  Segments position
               A
             F   B
@@ -11,12 +16,6 @@ DigitDisplay::DigitDisplay()
             E   C
               D   dp
     */
-
-    // Init the character conversion table with zeros
-    for (int i = 0; i < 128; i++) {
-        mCharConversion[i] = 0b00000000;
-    }
-    // Then define the values we will use
     // The segment bits are ordered like this : A F B E D DP C G
     mCharConversion[' '] = 0b00000000;
     mCharConversion['0'] = 0b11111010;
@@ -27,15 +26,21 @@ DigitDisplay::DigitDisplay()
     mCharConversion['5'] = 0b11001011; 
     mCharConversion['6'] = 0b11011011;
     mCharConversion['7'] = 0b10100010; 
-    mCharConversion['8'] = 0b11111011; 
+    mCharConversion['8'] = 0b11111011;
     mCharConversion['9'] = 0b11101011; 
     mCharConversion['a'] = 0b11110011;
     mCharConversion['b'] = 0b01011011; 
     mCharConversion['c'] = 0b11011000; 
     mCharConversion['d'] = 0b00111011; 
     mCharConversion['e'] = 0b11011001; 
-    mCharConversion['f'] = 0b11010001; 
+    mCharConversion['f'] = 0b11010001;
+    mCharConversion['n'] = 0b00010011;
     mCharConversion['p'] = 0b11110001;
+    mCharConversion['C'] = 0b11011000;
+    mCharConversion['O'] = 0b11111010;
+    mCharConversion['B'] = 0b11111011;
+    mCharConversion['L'] = 0b01011000;
+    mCharConversion['G'] = 0b11011010;
     mCharConversion['-'] = 0b00000001;
 }
 
@@ -48,7 +53,7 @@ void DigitDisplay::setup()
         pinMode(mFirstDigitPin + digit, OUTPUT);
     }
     mCurrentDigit = 0;
-    mLastDisplay = millis();
+    mLastDisplay = micros();
 }
 
 void DigitDisplay::setBuffer(const char prefix, const int value)
@@ -57,10 +62,19 @@ void DigitDisplay::setBuffer(const char prefix, const int value)
     mBuffer[0] = prefix;
 }
 
+void DigitDisplay::setBuffer(const char* sequence)
+{
+    for (int c = 0; c < mNbDigits; c++)
+    {
+        mBuffer[c] = sequence[c];
+    }
+}
+
 void DigitDisplay::displayBuffer()
 {
-    if (millis() - mLastDisplay > 4) 
+    if (micros() - mLastDisplay > 4000) 
     {
+        mLastDisplay = micros();
         mLastDigit = mCurrentDigit;
         mCurrentDigit = (mCurrentDigit + 1) % mNbDigits;
         writeDigit();
@@ -75,4 +89,14 @@ void DigitDisplay::writeDigit()
     digitalWrite(mFirstDigitPin + mLastDigit, LOW); 
     digitalWrite(mLatchPin, HIGH);    
     digitalWrite(mFirstDigitPin + mCurrentDigit, HIGH); 
+}
+
+void DigitDisplay::displaySequenceBlocking(const char* sequence, int time)
+{
+    unsigned long now = millis(), until = millis() + time;
+    setBuffer(sequence);
+    while (now < until) {
+        displayBuffer();
+        now = millis();
+    }
 }

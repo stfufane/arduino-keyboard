@@ -9,7 +9,9 @@ class DigitDisplay
     public:
         DigitDisplay();
         void setup();
+        void displaySequenceBlocking(const char* sequence, int time);
         void setBuffer(const char prefix, const int value);
+        void setBuffer(const char* sequence);
         void displayBuffer();
     private:
         void writeDigit();

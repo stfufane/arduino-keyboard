@@ -51,6 +51,10 @@ void Keyboard::setup()
             note++;
         }
     }
+    // Display a silly text sequence at startup
+    mDigitDisplay.displaySequenceBlocking("COOL", 1000);
+    mDigitDisplay.displaySequenceBlocking("BOOG", 1000);
+    mDigitDisplay.setBuffer("    ");
 }
 
 void Keyboard::checkValues()
@@ -127,7 +131,9 @@ void Keyboard::noteOn(int row, int col)
         vel = (((velocity * velocity) >> 7) * velocity) >> 7;
 
     // And send the note !
-    mMidiInterface.sendNoteOn(mKeyToMidiMap[row][col] + (mOctaveOffset * 12), vel, 1);
+    int note = mKeyToMidiMap[row][col] + (mOctaveOffset * 12);
+    mMidiInterface.sendNoteOn(note, vel, 1);
+    mDigitDisplay.setBuffer('n', note);
 }
 
 /**
@@ -139,8 +145,7 @@ void KeyboardCallbacks::lowerOctave(Keyboard &keyboard)
     if (keyboard.getOctaveOffset() > -3)
     {
         keyboard.setOctaveOffset(keyboard.getOctaveOffset() - 1);
-        int offset = keyboard.getOctaveOffset();
-        keyboard.getDisplay()->setBuffer((offset < 0 ? '-' : ' '), abs(offset));
+        keyboard.displayOctaveOffset();
     }
 }
 
@@ -149,7 +154,6 @@ void KeyboardCallbacks::upperOctave(Keyboard &keyboard)
     if (keyboard.getOctaveOffset() < 3)
     {
         keyboard.setOctaveOffset(keyboard.getOctaveOffset() + 1);
-        int offset = keyboard.getOctaveOffset();
-        keyboard.getDisplay()->setBuffer((offset < 0 ? '-' : ' '), abs(offset));
+        keyboard.displayOctaveOffset();
     }
 }

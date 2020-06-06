@@ -29,6 +29,7 @@ class Keyboard
 
         int getOctaveOffset() { return mOctaveOffset; }
         void setOctaveOffset(int offset) { mOctaveOffset = offset; }
+        void displayOctaveOffset() { mDigitDisplay.setBuffer((mOctaveOffset < 0 ? '-' : ' '), abs(mOctaveOffset)); }
         DigitDisplay* getDisplay() { return &mDigitDisplay; }
         midi::MidiInterface<midi::SerialMIDI<HardwareSerial>>& getMidi() { return mMidiInterface; }
     private:
