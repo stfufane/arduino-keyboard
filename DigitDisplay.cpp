@@ -54,12 +54,14 @@ void DigitDisplay::setup()
     }
     mCurrentDigit = 0;
     mLastDisplay = micros();
+    mLastUpdate = millis();
 }
 
 void DigitDisplay::setBuffer(const char prefix, const int value)
 {
     sprintf(mBuffer, " %3d", value);
     mBuffer[0] = prefix;
+    mLastUpdate = millis();
 }
 
 void DigitDisplay::setBuffer(const char* sequence)
@@ -68,6 +70,7 @@ void DigitDisplay::setBuffer(const char* sequence)
     {
         mBuffer[c] = sequence[c];
     }
+    mLastUpdate = millis();
 }
 
 void DigitDisplay::displayBuffer()
@@ -79,6 +82,7 @@ void DigitDisplay::displayBuffer()
         mCurrentDigit = (mCurrentDigit + 1) % mNbDigits;
         writeDigit();
     }
+    if (millis() - mLastUpdate > 5000) sprintf(mBuffer, "    ");
 }
 
 void DigitDisplay::writeDigit()

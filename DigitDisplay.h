@@ -26,4 +26,5 @@ class DigitDisplay
         int mCurrentDigit;
         int mLastDigit;
         unsigned long mLastDisplay;
+        unsigned long mLastUpdate;
 };
