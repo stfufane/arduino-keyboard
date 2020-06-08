@@ -1,4 +1,5 @@
 #include "Keyboard.h"
+#include "LED.h"
 #include "Button.h"
 #include "Modulation.h"
 #include "PitchWheel.h"
@@ -11,6 +12,7 @@ Keyboard::Keyboard(midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiIn
       mControlPins { 
                      new Button(30, *this, &KeyboardCallbacks::lowerOctave),
                      new Button(32, *this, &KeyboardCallbacks::upperOctave),
+                     new Button(34, *this, &KeyboardCallbacks::toggleHold, new LED(36, false)),
                      new Modulation(A0, 1, *this),
                      new PitchWheel(A1, *this)
                    }
@@ -107,12 +109,22 @@ void Keyboard::checkValues()
             if (mRowValue[rowCtr] == 0 && mKeyPressed[rowCtr][colCtr])
             {
                 mKeyPressed[rowCtr][colCtr] = false;
-                mMidiInterface.sendNoteOff(mKeyToMidiMap[rowCtr][colCtr] + (mOctaveOffset * 12), 0, 1);
+                if (!mHold) 
+                    mMidiInterface.sendNoteOff(mKeyToMidiMap[rowCtr][colCtr] + (mOctaveOffset * 12), 0, 1);
                 DBG("Note off");
             }
         }
     }
     mDigitDisplay.displayBuffer();
+}
+
+void Keyboard::toggleHold()
+{ 
+    if (mHold && mHeldNote != -1) {
+        mMidiInterface.sendNoteOff(mHeldNote, 0, 1);
+        mHeldNote = -1;
+    }
+    mHold = !mHold;
 }
 
 void Keyboard::noteOn(int row, int col)
@@ -133,6 +145,11 @@ void Keyboard::noteOn(int row, int col)
     // And send the note !
     int note = mKeyToMidiMap[row][col] + (mOctaveOffset * 12);
     mMidiInterface.sendNoteOn(note, vel, 1);
+    if (mHold) {
+        if (mHeldNote > -1)
+           mMidiInterface.sendNoteOff(mHeldNote, 0, 1);
+        mHeldNote = note;
+    }
     mDigitDisplay.setBuffer('n', note);
 }
 
@@ -156,4 +173,9 @@ void KeyboardCallbacks::upperOctave(Keyboard &keyboard)
         keyboard.setOctaveOffset(keyboard.getOctaveOffset() + 1);
         keyboard.displayOctaveOffset();
     }
+}
+
+void KeyboardCallbacks::toggleHold(Keyboard &keyboard)
+{
+    keyboard.toggleHold();
 }

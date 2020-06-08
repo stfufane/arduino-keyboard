@@ -10,7 +10,7 @@
 #define NUM_COLS 8
 
 // Number of control pins
-#define NB_PINS 4
+#define NB_PINS 5
 
 #define MAX_VELOCITY 127
 
@@ -30,6 +30,7 @@ class Keyboard
         int getOctaveOffset() { return mOctaveOffset; }
         void setOctaveOffset(int offset) { mOctaveOffset = offset; }
         void displayOctaveOffset() { mDigitDisplay.setBuffer((mOctaveOffset < 0 ? '-' : ' '), abs(mOctaveOffset)); }
+        void toggleHold();
         DigitDisplay* getDisplay() { return &mDigitDisplay; }
         midi::MidiInterface<midi::SerialMIDI<HardwareSerial>>& getMidi() { return mMidiInterface; }
     private:
@@ -50,6 +51,9 @@ class Keyboard
         int mRowValue[NUM_ROWS];
 
         int mOctaveOffset = 0;
+
+        bool mHold = false;
+        int mHeldNote = -1;
         
         void noteOn(int row, int col);
 };
@@ -59,6 +63,7 @@ class KeyboardCallbacks
 public:
     static void lowerOctave(Keyboard &keyboard);
     static void upperOctave(Keyboard &keyboard);
+    static void toggleHold(Keyboard &keyboard);
 };
 
 typedef void (*KeyboardCallback)(Keyboard &keyboard);
