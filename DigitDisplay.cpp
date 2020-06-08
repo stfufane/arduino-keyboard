@@ -30,17 +30,25 @@ DigitDisplay::DigitDisplay()
     mCharConversion['9'] = 0b11101011; 
     mCharConversion['a'] = 0b11110011;
     mCharConversion['b'] = 0b01011011; 
-    mCharConversion['c'] = 0b11011000; 
+    mCharConversion['c'] = 0b00011001; 
     mCharConversion['d'] = 0b00111011; 
     mCharConversion['e'] = 0b11011001; 
     mCharConversion['f'] = 0b11010001;
+    mCharConversion['i'] = 0b00010000;
     mCharConversion['n'] = 0b00010011;
+    mCharConversion['o'] = 0b00011011;
     mCharConversion['p'] = 0b11110001;
-    mCharConversion['C'] = 0b11011000;
-    mCharConversion['O'] = 0b11111010;
+    mCharConversion['r'] = 0b00010001;
+    mCharConversion['t'] = 0b01011001;
+    mCharConversion['A'] = 0b11110011;
     mCharConversion['B'] = 0b11111011;
-    mCharConversion['L'] = 0b01011000;
+    mCharConversion['C'] = 0b11011000;
     mCharConversion['G'] = 0b11011010;
+    mCharConversion['H'] = 0b01110011;
+    mCharConversion['I'] = 0b01010000;
+    mCharConversion['L'] = 0b01011000;
+    mCharConversion['O'] = 0b11111010;
+    mCharConversion['S'] = 0b11001011; 
     mCharConversion['-'] = 0b00000001;
 }
 

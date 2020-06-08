@@ -10,9 +10,10 @@ Keyboard::Keyboard(midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiIn
       mOutputPins { 22, 23, 24, 25, 26, 27, 28, 29 },
       mDigitDisplay(),
       mControlPins { 
-                     new Button(30, *this, &KeyboardCallbacks::lowerOctave),
-                     new Button(32, *this, &KeyboardCallbacks::upperOctave),
+                     new Button(30, *this, &KeyboardCallbacks::transposeDown),
+                     new Button(32, *this, &KeyboardCallbacks::transposeUp),
                      new Button(34, *this, &KeyboardCallbacks::toggleHold, new LED(36, false)),
+                     new Button(38, *this, KeyboardCallbacks::switchTransposeMode),
                      new Modulation(A0, 1, *this),
                      new PitchWheel(A1, *this)
                    }
@@ -110,7 +111,7 @@ void Keyboard::checkValues()
             {
                 mKeyPressed[rowCtr][colCtr] = false;
                 if (!mHold) 
-                    mMidiInterface.sendNoteOff(mKeyToMidiMap[rowCtr][colCtr] + (mOctaveOffset * 12), 0, 1);
+                    mMidiInterface.sendNoteOff(mKeyToMidiMap[rowCtr][colCtr] + (mOctaveOffset * 12) + mSemitoneOffset, 0, 1);
                 DBG("Note off");
             }
         }
@@ -143,7 +144,7 @@ void Keyboard::noteOn(int row, int col)
         vel = (((velocity * velocity) >> 7) * velocity) >> 7;
 
     // And send the note !
-    int note = mKeyToMidiMap[row][col] + (mOctaveOffset * 12);
+    int note = mKeyToMidiMap[row][col] + (mOctaveOffset * 12) + mSemitoneOffset;
     mMidiInterface.sendNoteOn(note, vel, 1);
     if (mHold) {
         if (mHeldNote > -1)
@@ -157,21 +158,89 @@ void Keyboard::noteOn(int row, int col)
  * Callbacks that will be called by buttons (see Button class)
  */
 
-void KeyboardCallbacks::lowerOctave(Keyboard &keyboard)
+void KeyboardCallbacks::switchTransposeMode(Keyboard &keyboard)
 {
-    if (keyboard.getOctaveOffset() > -3)
+    keyboard.setTransposeMode((keyboard.getTransposeMode() + 1) % TRANSPOSE_MODES);
+    keyboard.getDisplay()->setBuffer(keyboard.getTransposeModeText());
+}
+
+void KeyboardCallbacks::transposeDown(Keyboard &keyboard)
+{
+    switch (keyboard.getTransposeMode())
     {
-        keyboard.setOctaveOffset(keyboard.getOctaveOffset() - 1);
-        keyboard.displayOctaveOffset();
+        // 0 is octave transposition (from -3 to 3)
+        case 0:
+            if (keyboard.getOctaveOffset() > -3)
+            {
+                keyboard.setOctaveOffset(keyboard.getOctaveOffset() - 1);
+                keyboard.displayTransposition(keyboard.getOctaveOffset());
+            }
+            break;
+        // 1 is semitone transposition from -12 to 12
+        case 1:
+            if (keyboard.getSemitoneOffset() > -12)
+            {
+                keyboard.setSemitoneOffset(keyboard.getSemitoneOffset() - 1);
+                keyboard.displayTransposition(keyboard.getSemitoneOffset());
+            }
+            break;
+        // 2 is pitch bend range from 0 to 12
+        case 2:
+            if (keyboard.getPitchBendRange() > 0)
+            {
+                keyboard.setPitchBendRange(keyboard.getPitchBendRange() - 1);
+                keyboard.displayTransposition(keyboard.getPitchBendRange());
+            }
+            break;
+        // 3 is key priority from 0 to 2
+        case 3:
+            if (keyboard.getKeyPriority() > 0)
+            {
+                keyboard.setKeyPriority(keyboard.getKeyPriority() - 1);
+                keyboard.getDisplay()->setBuffer(keyboard.getKeyPriorityText());
+            }
+            break;
     }
 }
 
-void KeyboardCallbacks::upperOctave(Keyboard &keyboard)
+void KeyboardCallbacks::transposeUp(Keyboard &keyboard)
 {
-    if (keyboard.getOctaveOffset() < 3)
+    switch (keyboard.getTransposeMode())
     {
-        keyboard.setOctaveOffset(keyboard.getOctaveOffset() + 1);
-        keyboard.displayOctaveOffset();
+        // 0 is octave transposition (from -3 to 3)
+        case 0:
+            if (keyboard.getOctaveOffset() < 3)
+            {
+                keyboard.setOctaveOffset(keyboard.getOctaveOffset() + 1);
+                keyboard.displayTransposition(keyboard.getOctaveOffset());
+            }
+            break;
+        // 1 is semitone transposition from -12 to 12
+        case 1:
+            if (keyboard.getSemitoneOffset() < 12)
+            {
+                keyboard.setSemitoneOffset(keyboard.getSemitoneOffset() + 1);
+                keyboard.displayTransposition(keyboard.getSemitoneOffset());
+            }
+            break;
+        // 2 is pitch bend range from 0 to 12
+        case 2:
+            if (keyboard.getPitchBendRange() < 12)
+            {
+                // TODO send sysex
+                keyboard.setPitchBendRange(keyboard.getPitchBendRange() + 1);
+                keyboard.displayTransposition(keyboard.getPitchBendRange());
+            }
+            break;
+        // 3 is key priority from 0 to 2
+        case 3:
+            if (keyboard.getKeyPriority() < 2)
+            {
+                // TODO send sysex
+                keyboard.setKeyPriority(keyboard.getKeyPriority() + 1);
+                keyboard.getDisplay()->setBuffer(keyboard.getKeyPriorityText());
+            }
+            break;
     }
 }
 
