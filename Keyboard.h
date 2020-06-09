@@ -42,15 +42,18 @@ class Keyboard
         int getSemitoneOffset() { return mSemitoneOffset; }
         void setSemitoneOffset(int offset) { mSemitoneOffset = offset; }
 
-        int getPitchBendRange() { return mPitchBendRange; }
-        void setPitchBendRange(int range) { mPitchBendRange = range; }
+        byte getPitchBendRange() { return mPitchBendRange; }
+        void setPitchBendRange(byte range) { mPitchBendRange = range; }
 
-        int getKeyPriority() { return mKeyPriority; }
-        void setKeyPriority(int priority) { mKeyPriority = priority; }
+        byte getKeyPriority() { return mKeyPriority; }
+        void setKeyPriority(byte priority) { mKeyPriority = priority; }
 
+        void sendSysEx(byte idx7, byte idx9);
+        
         void toggleHold();
         DigitDisplay* getDisplay() { return &mDigitDisplay; }
         midi::MidiInterface<midi::SerialMIDI<HardwareSerial>>& getMidi() { return mMidiInterface; }
+
     private:
         midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &mMidiInterface;
         ControlPin* mControlPins[NB_PINS];
@@ -69,14 +72,17 @@ class Keyboard
         int mRowValue[NUM_ROWS];
 
         // Strings to display when changing the transpose mode.
-        const char *mTransposeModes[TRANSPOSE_MODES] = { "Octa", "tran", "bend", "prio" };
-        const char *mKeyPriorities[3] = { "  LO", "HIGH", "LASt" };
+        const char* mTransposeModes[TRANSPOSE_MODES] = { "Octa", "tran", "bend", "prio" };
+        const char* mKeyPriorities[3] = { "  LO", "HIGH", "LASt" };
         // Transpose button variables.
         int mTransposeMode = 0;
         int mOctaveOffset = 0;
         int mSemitoneOffset = 0;
-        int mPitchBendRange = 2;
-        int mKeyPriority = 2;
+        byte mPitchBendRange = 2;
+        byte mKeyPriority = 2;
+
+        // Base sysex array for parameter changes. Only indexes 7 and 9 will change depending on what is sent.
+        byte mSysexArray[11] = { 0xf0, 0x00, 0x20, 0x32, 0x00, 0x7f, 0x0A, 0x00, 0x00, 0x00, 0x7f };
 
         bool mHold = false;
         int mHeldNote = -1;

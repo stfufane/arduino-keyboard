@@ -36,6 +36,9 @@ void Keyboard::setup()
     // Init display pins.
     mDigitDisplay.setup();
 
+    // Make pitch bend modifiable.
+    sendSysEx(0x0c, 0x01);
+
     // Setup control pins
     for (int pin = 0; pin < NB_PINS; pin++)
     {
@@ -154,6 +157,13 @@ void Keyboard::noteOn(int row, int col)
     mDigitDisplay.setBuffer('n', note);
 }
 
+void Keyboard::sendSysEx(byte idx7, byte idx9)
+{
+    mSysexArray[7] = idx7;
+    mSysexArray[9] = idx9;
+    mMidiInterface.sendSysEx(11, mSysexArray, true);
+}
+
 /**
  * Callbacks that will be called by buttons (see Button class)
  */
@@ -189,6 +199,7 @@ void KeyboardCallbacks::transposeDown(Keyboard &keyboard)
             if (keyboard.getPitchBendRange() > 0)
             {
                 keyboard.setPitchBendRange(keyboard.getPitchBendRange() - 1);
+                keyboard.sendSysEx(0x03, keyboard.getPitchBendRange());
                 keyboard.displayTransposition(keyboard.getPitchBendRange());
             }
             break;
@@ -197,6 +208,7 @@ void KeyboardCallbacks::transposeDown(Keyboard &keyboard)
             if (keyboard.getKeyPriority() > 0)
             {
                 keyboard.setKeyPriority(keyboard.getKeyPriority() - 1);
+                keyboard.sendSysEx(0x01, keyboard.getKeyPriority());
                 keyboard.getDisplay()->setBuffer(keyboard.getKeyPriorityText());
             }
             break;
@@ -227,8 +239,8 @@ void KeyboardCallbacks::transposeUp(Keyboard &keyboard)
         case 2:
             if (keyboard.getPitchBendRange() < 12)
             {
-                // TODO send sysex
                 keyboard.setPitchBendRange(keyboard.getPitchBendRange() + 1);
+                keyboard.sendSysEx(0x03, keyboard.getPitchBendRange());
                 keyboard.displayTransposition(keyboard.getPitchBendRange());
             }
             break;
@@ -236,8 +248,8 @@ void KeyboardCallbacks::transposeUp(Keyboard &keyboard)
         case 3:
             if (keyboard.getKeyPriority() < 2)
             {
-                // TODO send sysex
                 keyboard.setKeyPriority(keyboard.getKeyPriority() + 1);
+                keyboard.sendSysEx(0x01, keyboard.getKeyPriority());
                 keyboard.getDisplay()->setBuffer(keyboard.getKeyPriorityText());
             }
             break;
