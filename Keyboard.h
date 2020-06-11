@@ -82,7 +82,7 @@ class Keyboard
         byte mKeyPriority = 2;
 
         // Base sysex array for parameter changes. Only indexes 7 and 9 will change depending on what is sent.
-        byte mSysexArray[11] = { 0xf0, 0x00, 0x20, 0x32, 0x00, 0x7f, 0x0A, 0x00, 0x00, 0x00, 0x7f };
+        byte mSysexArray[11] = { 0xf0, 0x00, 0x20, 0x32, 0x00, 0x7f, 0x0A, 0x00, 0x00, 0x00, 0xf7 };
 
         bool mHold = false;
         int mHeldNote = -1;

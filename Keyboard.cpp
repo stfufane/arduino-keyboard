@@ -18,6 +18,9 @@ Keyboard::Keyboard(midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiIn
                      new PitchWheel(A1, *this)
                    }
 {  
+    // Start MIDI interface.
+    mMidiInterface.begin();
+
     // Declare column pins of the scan matrix
     for (int pin = 0; pin < NUM_COLS; pin++)
     {
@@ -57,9 +60,9 @@ void Keyboard::setup()
             note++;
         }
     }
-    // Display a silly text sequence at startup
-    mDigitDisplay.displaySequenceBlocking("COOL", 1000);
+    // Display a text sequence at startup
     mDigitDisplay.displaySequenceBlocking("BOOG", 1000);
+    mDigitDisplay.displaySequenceBlocking("2020", 1000);
     mDigitDisplay.setBuffer("    ");
 }
 
