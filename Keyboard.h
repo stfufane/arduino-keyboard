@@ -9,10 +9,10 @@
 #define NUM_ROWS 8
 #define NUM_COLS 8
 
-#define TRANSPOSE_MODES 4
+#define TRANSPOSE_MODES 3
 
 // Number of control pins
-#define NB_PINS 6
+#define NB_PINS 8
 
 #define MAX_VELOCITY 127
 
@@ -37,16 +37,19 @@ class Keyboard
         void displayTransposition(int transposition) { mDigitDisplay.setBuffer((transposition < 0 ? '-' : ' '), abs(transposition)); }
 
         int getOctaveOffset() { return mOctaveOffset; }
-        void setOctaveOffset(int offset) { mOctaveOffset = offset; }
+        void setOctaveOffset(int offset);
 
         int getSemitoneOffset() { return mSemitoneOffset; }
-        void setSemitoneOffset(int offset) { mSemitoneOffset = offset; }
+        void setSemitoneOffset(int offset);
 
         byte getPitchBendRange() { return mPitchBendRange; }
-        void setPitchBendRange(byte range) { mPitchBendRange = range; }
+        void setPitchBendRange(byte range);
 
         byte getKeyPriority() { return mKeyPriority; }
-        void setKeyPriority(byte priority) { mKeyPriority = priority; }
+        void setKeyPriority(byte priority);
+
+        byte getRetrigger() { return mRetrigger; }
+        void setRetriggerr(byte retrigger);
 
         void sendSysEx(byte idx7, byte idx9);
         
@@ -72,7 +75,7 @@ class Keyboard
         int mRowValue[NUM_ROWS];
 
         // Strings to display when changing the transpose mode.
-        const char* mTransposeModes[TRANSPOSE_MODES] = { "Octa", "tran", "bend", "prio" };
+        const char* mTransposeModes[TRANSPOSE_MODES] = { "Octa", "tran", "bend" };
         const char* mKeyPriorities[3] = { "  LO", "HIGH", "LASt" };
         // Transpose button variables.
         int mTransposeMode = 0;
@@ -80,6 +83,7 @@ class Keyboard
         int mSemitoneOffset = 0;
         byte mPitchBendRange = 2;
         byte mKeyPriority = 2;
+        byte mRetrigger = 0;
 
         // Base sysex array for parameter changes. Only indexes 7 and 9 will change depending on what is sent.
         byte mSysexArray[11] = { 0xf0, 0x00, 0x20, 0x32, 0x00, 0x7f, 0x0A, 0x00, 0x00, 0x00, 0xf7 };
@@ -94,9 +98,11 @@ class KeyboardCallbacks
 {
 public:
     static void switchTransposeMode(Keyboard &keyboard);
+    static void switchRetrigger(Keyboard &keyboard);
     static void transposeDown(Keyboard &keyboard);
     static void transposeUp(Keyboard &keyboard);
     static void toggleHold(Keyboard &keyboard);
+    static void switchKeyPriority(Keyboard &keyboard);
 };
 
 typedef void (*KeyboardCallback)(Keyboard &keyboard);
