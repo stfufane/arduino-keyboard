@@ -11,6 +11,7 @@ Keyboard::Keyboard(midi::MidiInterface<midi::SerialMIDI<HardwareSerial>> &midiIn
       mDigitDisplay(),
       mControlPins { 
                      new Button(30, *this, &KeyboardCallbacks::transposeDown),
+                     new Button(31, *this, &KeyboardCallbacks::reset),
                      new Button(32, *this, &KeyboardCallbacks::transposeUp),
                      new Button(34, *this, &KeyboardCallbacks::toggleHold, new LED(36, false)),
                      new Button(35, *this, &KeyboardCallbacks::switchRetrigger, new LED(39, false)),
@@ -153,7 +154,7 @@ void Keyboard::setKeyPriority(byte priority)
     mDigitDisplay.setBuffer(getKeyPriorityText());
 }
 
-void Keyboard::setRetriggerr(byte retrigger)
+void Keyboard::setRetrigger(byte retrigger)
 {
     mRetrigger = retrigger;
     sendSysEx(0x02, mRetrigger);
@@ -259,10 +260,19 @@ void KeyboardCallbacks::switchKeyPriority(Keyboard &keyboard)
 void KeyboardCallbacks::switchRetrigger(Keyboard &keyboard)
 {
     byte retrigger = !keyboard.getRetrigger();
-    keyboard.setRetriggerr(retrigger);
+    keyboard.setRetrigger(retrigger);
 }
 
 void KeyboardCallbacks::toggleHold(Keyboard &keyboard)
 {
     keyboard.toggleHold();
+}
+
+// Set keyboard transpose values to default values.
+void KeyboardCallbacks::reset(Keyboard &keyboard)
+{
+    keyboard.setOctaveOffset(0);
+    keyboard.setSemitoneOffset(0);
+    keyboard.setPitchBendRange(2);
+    keyboard.getDisplay()->setBuffer("init");
 }

@@ -12,7 +12,7 @@
 #define TRANSPOSE_MODES 3
 
 // Number of control pins
-#define NB_PINS 8
+#define NB_PINS 9
 
 #define MAX_VELOCITY 127
 
@@ -49,7 +49,7 @@ class Keyboard
         void setKeyPriority(byte priority);
 
         byte getRetrigger() { return mRetrigger; }
-        void setRetriggerr(byte retrigger);
+        void setRetrigger(byte retrigger);
 
         void sendSysEx(byte idx7, byte idx9);
         
@@ -103,6 +103,7 @@ public:
     static void transposeUp(Keyboard &keyboard);
     static void toggleHold(Keyboard &keyboard);
     static void switchKeyPriority(Keyboard &keyboard);
+    static void reset(Keyboard &keyboard);
 };
 
 typedef void (*KeyboardCallback)(Keyboard &keyboard);
